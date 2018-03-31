@@ -2,7 +2,7 @@ import ast # Abstract syntax tree used to build dictionary for transition rules
 import re # RegEx used to check if string is apart of alphabet
 import copy # Used to perform deep copy of nested dictionaries
 
-def dfa_simulator(filename):
+def dfa_simulator(filename, inputStringFile, machineNumber):
 
 	with open(filename) as fa:
 		#lines = f.readlines()
@@ -160,6 +160,7 @@ def dfa_simulator(filename):
 	# Check if machine is NFA or DFA or INVALID
 	machineClass = ''
 	if '`' in alphabet or isNFA == True: # If epsilon transition in rules or multiple transtions for same symbol
+	    print "EPSILON TRANSITION: NFA"
 	    machineClass = 'NFA'
 	else:
 	    machineClass = 'DFA'
@@ -181,13 +182,53 @@ def dfa_simulator(filename):
 	       # Iterate through input char by char 
 		for char in inputString:
 		    
-		    # Check if there is a transition rule for the current input and state
-		    if not(char in transitions[state].keys()):
+                    # Check if rule exists for state 
+	            if not(state in transitions.keys()):
+	                return False
+
+		    # Check if there is a transition rule for the current input symbol given the state
+		    if not(char in transitions[state].keys()):# or not(set(transitions[state].values()) == set(transitions.keys())): # Second half handles transitions to states that don't exist
 		        return False
 		    else:
 		        state = transitions[state][char]
 		
 		return state in acceptStates
+
+	# Run machine against every string in the input file
+	if machineClass == 'DFA':
+		if machineNumber < 10:
+		    txtFile = open('Output_Strings/m0' + str(machineNumber) + '.txt', "w")
+		elif machineNumber >= 10:
+		    txtFile = open('Output_Strings/m' + str(machineNumber) + '.txt', "w")
+		
+		with open(inputStringFile) as stringFile:
+			lines = stringFile.read().splitlines() # removes /r and /n 
+
+		acceptCount = 0
+		totalCount = len(lines)
+
+		for i in range(len(lines)):
+		    acceptString = run_fa(transitionRules, 0, acceptStates, lines[i], alphabet)
+		    if acceptString == True:
+			txtFile.write(lines[i] + '\n')
+			acceptCount += 1
+		print 'Accepted Strings: ' + str(acceptCount) + ' / ' + str(totalCount)
+		stringFile.close()
+
+	# Log FA information to logfile
+	if machineNumber < 10:
+	    logFile = open('Logs/m0' + str(machineNumber) + '.log', "w")
+	elif machineNumber >= 10:
+	    logFile = open('Logs/m' + str(machineNumber) + '.log', "w")
+
+	logFile.write('Valid: ' + machineClass + '\n')
+	logFile.write('States: ' + str(numStates) + '\n')
+	logFile.write('Alphabet: ' + alphabet + '\n')
+	if machineClass == 'DFA':
+	    logFile.write('Accepted Strings: ' + str(acceptCount) + ' / ' + str(totalCount))
+	elif machineClass == 'NFA':
+	    logFile.write('Accepted Strings: 0 / 0')
+	
 
 	## TESTING ##
 	#print accepts(transitionRules, 0, acceptStates, 'baa', alphabet) #mo2.fa works with (empty string)
@@ -220,25 +261,28 @@ def dfa_simulator(filename):
 	# 
 	# wrapper:
 	# X. encapsulate everything here into a class which takes a file name as param
-	# 2. in main, iterate through folder for every file 
-	# 3. run each string in accepts for each machine
-	# 3. output information files 
+	# X. in main, iterate through folder for every file 
+	# X. run each string in accepts for each machine
+	# X. output information files 
 	############
 
 #End dfa_simulator
 
+
 filenameLeft = 'Machines/m'
 filenameRight = '.fa'
 numMachines = 31
+
+stringFile = 'Machines/input.txt'
 
 for machine in range(numMachines):
     print "FA: " + str(machine)
      
     # Iterate through all machines (fa)     
     if machine < 10:  
-        dfa_simulator(filenameLeft + '0' + str(machine) + filenameRight) 
+        dfa_simulator(filenameLeft + '0' + str(machine) + filenameRight, stringFile, machine) 
     elif machine >= 10:
-        dfa_simulator(filenameLeft + str(machine) + filenameRight)
+        dfa_simulator(filenameLeft + str(machine) + filenameRight, stringFile, machine)
   
     print ""
 
