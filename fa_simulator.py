@@ -159,8 +159,10 @@ def dfa_simulator(filename, inputStringFile, machineNumber):
 
 	# Check if machine is NFA or DFA or INVALID
 	machineClass = ''
-	if '`' in alphabet or isNFA == True: # If epsilon transition in rules or multiple transtions for same symbol
+	if '`' in alphabet: # If epsilon transition in rules or multiple transtions for same symbol
 	    print "EPSILON TRANSITION: NFA"
+	    machineClass = 'NFA'
+	elif isNFA == True:
 	    machineClass = 'NFA'
 	else:
 	    machineClass = 'DFA'
@@ -187,7 +189,7 @@ def dfa_simulator(filename, inputStringFile, machineNumber):
 	                return False
 
 		    # Check if there is a transition rule for the current input symbol given the state
-		    if not(char in transitions[state].keys()):# or not(set(transitions[state].values()) == set(transitions.keys())): # Second half handles transitions to states that don't exist
+		    if not(char in transitions[state].keys()):
 		        return False
 		    else:
 		        state = transitions[state][char]
@@ -228,43 +230,6 @@ def dfa_simulator(filename, inputStringFile, machineNumber):
 	    logFile.write('Accepted Strings: ' + str(acceptCount) + ' / ' + str(totalCount))
 	elif machineClass == 'NFA':
 	    logFile.write('Accepted Strings: 0 / 0')
-	
-
-	## TESTING ##
-	#print accepts(transitionRules, 0, acceptStates, 'baa', alphabet) #mo2.fa works with (empty string)
-
-	#print accepts(transitionRules, 0, {17,9}, '001') #m007.fa works with {n,n,n} : TRUE
-	#print accepts(transitionRules, 0, {17,9}, '01') #TRUE
-	#print accepts(transitionRules, 0, {17,9}, '0') #FALSE
-	#print accepts(transitionRules, 0, {17,9}, '0010')#m007.fa works with NFA also
-
-	#print accepts(transitionRules, 0, {}, 'abcdef') #m009.fa works with {} accepting
-	#print accepts(transitionRules, 0, {1}, 'aaa')
-	#print accepts(transitionRules, 0, {1}, 'aa')
-	####
-
-	### NEED ###
-	# rules input:
-	# X. handle empty line rule for input
-	# 
-	# accepts:
-	# X: accepts returns false if symbol not in alphabet
-	# X: accepts returns false if it cant find a transition rule
-	# 
-	# rule extraction: 
-	# X. get alphabet for transitionRules
-	# X. get accepting states for transitionRules (tempLines[0])
-	# X. get total number of states
-	#
-	# nfa:
-	# X. check for nfa (epsilon trans, mult rules same state)
-	# 
-	# wrapper:
-	# X. encapsulate everything here into a class which takes a file name as param
-	# X. in main, iterate through folder for every file 
-	# X. run each string in accepts for each machine
-	# X. output information files 
-	############
 
 #End dfa_simulator
 
